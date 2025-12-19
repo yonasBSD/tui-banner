@@ -55,6 +55,8 @@ pub enum Preset {
     RoyalPurple,
     /// Matrix (neon green -> deep green).
     Matrix,
+    /// Aurora Flux (teal -> sky blue -> violet -> aurora purple).
+    AuroraFlux,
 }
 
 impl Palette {
@@ -128,6 +130,7 @@ impl Preset {
             Preset::EarthTone => &["#E6CCB2", "#B08968", "#6B705C"],
             Preset::RoyalPurple => &["#E9D5FF", "#A855F7", "#581C87"],
             Preset::Matrix => &["#00FF9C", "#00C46A", "#003B24"],
+            Preset::AuroraFlux => &["#34FFD2", "#4F9DFF", "#7B61FF", "#C77DFF"],
         }
     }
 }

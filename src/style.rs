@@ -29,6 +29,8 @@ pub enum Style {
     RoyalPurple,
     /// Matrix (neon green -> deep green).
     Matrix,
+    /// Aurora Flux (teal -> sky blue -> violet -> aurora purple).
+    AuroraFlux,
 }
 
 impl Style {
@@ -47,6 +49,7 @@ impl Style {
             Style::EarthTone => Preset::EarthTone,
             Style::RoyalPurple => Preset::RoyalPurple,
             Style::Matrix => Preset::Matrix,
+            Style::AuroraFlux => Preset::AuroraFlux,
         }
     }
 }

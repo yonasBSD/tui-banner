@@ -38,6 +38,7 @@ fn main() -> Result<(), tui_banner::BannerError> {
 ```bash
 cargo run --example neon_gradient_neon_cyber
 cargo run --example neon_gradient_arctic_tech
+cargo run --example neon_gradient_aurora_flux
 cargo run --example neon_gradient_deep_space
 cargo run --example neon_gradient_ocean_flow
 cargo run --example neon_gradient_sunset_neon
