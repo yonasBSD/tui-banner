@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::grid::Grid;
 
-mod builtin;
 /// Figlet font parser.
 pub mod figlet;
 
@@ -21,15 +20,12 @@ pub struct Font {
 }
 
 impl Font {
-    /// Built-in 5x5 block font.
-    pub fn block() -> Self {
-        builtin::block_font()
-    }
-
     /// Built-in DOS Rebel (Figlet) font.
+    ///
+    /// Panics if the bundled font data is invalid.
     pub fn dos_rebel() -> Self {
         figlet::parse(include_str!("../../assets/fonts/dosrebel.flf"))
-            .unwrap_or_else(|_| builtin::block_font())
+            .expect("Bundled dosrebel.flf must be a valid Figlet font")
     }
 
     /// Parse a Figlet `.flf` string into a font.

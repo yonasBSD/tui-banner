@@ -34,7 +34,7 @@ impl Banner {
     pub fn new(text: impl Into<String>) -> Self {
         Self {
             text: text.into(),
-            font: Font::block(),
+            font: Font::dos_rebel(),
             gradient: None,
             fill: Fill::Blocks,
             shadow: None,

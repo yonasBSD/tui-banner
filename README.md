@@ -7,7 +7,7 @@ Rust CLI/TUI 彩色 ASCII Art Banner 渲染库 / Rust library for colorful ASCII
 ## Features / 特性
 
 - Grid-first 渲染管线（文本 → Glyph Grid → Effects → ANSI 输出）
-- 内置 Block 字体 + DOS Rebel (Figlet) 字体
+- 内置 DOS Rebel (Figlet) 字体
 - Truecolor / 256 色 / 无色输出 + 自动检测
 - 渐变（垂直 / 水平 / 对角）
 - 像素填充、点阵抖动、阴影、边缘半透明效果
@@ -53,7 +53,7 @@ fn main() {
 ### Banner（高层 API）
 
 - `Banner::new(text)`
-- `font(Font::block() | Font::dos_rebel() | Font::from_figlet_str(...))`
+- `font(Font::dos_rebel() | Font::from_figlet_str(...))`
 - `gradient(Gradient::vertical | horizontal | diagonal)`
 - `fill(Fill::Keep | Fill::Blocks | Fill::Pixel { ... })`
 - `dither().targets("░▒").dots("·:").checker(k)`
