@@ -1,0 +1,21 @@
+use tui_banner::{Align, Banner, ColorMode, Fill, Gradient, Palette};
+
+fn main() -> Result<(), tui_banner::BannerError> {
+    let banner = Banner::new("FOREST SKY")? // text
+        .color_mode(ColorMode::TrueColor) // truecolor
+        .gradient(Gradient::vertical(Palette::from_hex(&[
+            "#22C55E", // green
+            "#14B8A6", // teal
+            "#2563EB", // blue
+        ]))) // gradient stops
+        .fill(Fill::Keep) // keep glyphs
+        .dither()
+        .targets("░▒▓") // dither targets
+        .checker(3) // checker period
+        .align(Align::Center) // center align
+        .padding(1) // uniform padding
+        .render();
+
+    println!("{banner}");
+    Ok(())
+}
