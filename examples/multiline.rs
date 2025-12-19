@@ -1,7 +1,7 @@
 use tui_banner::{Align, Banner, Fill, Gradient, Palette};
 
 fn main() {
-    let banner = match Banner::new("MULTI\nLINE\nBANNER") {
+    let banner = match Banner::new("RUST CLI") {
         Ok(banner) => banner
             .gradient(Gradient::vertical(Palette::from_hex(&[
                 "#00C2FF", "#00FFA3",

@@ -1,7 +1,7 @@
 use tui_banner::{Align, Banner, ColorMode, Fill, Gradient, Palette};
 
 fn main() -> Result<(), tui_banner::BannerError> {
-    let banner = Banner::new("EARTH TONE")? // text
+    let banner = Banner::new("RUST CLI")? // text
         .color_mode(ColorMode::TrueColor) // truecolor
         .gradient(Gradient::vertical(Palette::from_hex(&[
             "#E6CCB2", // sand

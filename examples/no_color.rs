@@ -1,7 +1,7 @@
 use tui_banner::{Align, Banner, ColorMode, Fill, Gradient, Palette};
 
 fn main() {
-    let banner = match Banner::new("NO COLOR") {
+    let banner = match Banner::new("RUST CLI") {
         Ok(banner) => banner
             .color_mode(ColorMode::NoColor)
             .gradient(Gradient::vertical(Palette::from_hex(&[
