@@ -3,21 +3,12 @@
 //!
 //! ## Quick Start
 //! ```rust
-//! use tui_banner::{Align, Banner, Fill, Gradient, Palette};
+//! use tui_banner::{Align, Banner, Style};
 //!
 //! # fn main() -> Result<(), tui_banner::BannerError> {
 //!
 //! let banner = Banner::new("RUST CLI")?
-//!     .gradient(Gradient::vertical(Palette::from_hex(&[
-//!         "#00E5FF",
-//!         "#7B5CFF",
-//!         "#FF5AD9",
-//!     ])))
-//!     .fill(Fill::Keep)
-//!     .dither()
-//!     .targets("░▒▓")
-//!     .dots("·:")
-//!     .checker(3)
+//!     .style(Style::NeonCyber)
 //!     .align(Align::Center)
 //!     .padding(1)
 //!     .render();
@@ -43,13 +34,16 @@ pub mod font;
 pub mod gradient;
 /// Grid and layout types.
 pub mod grid;
+/// Named banner styles.
+pub mod style;
 /// Terminal capability detection.
 pub mod terminal;
 
 pub use banner::{Banner, BannerError};
-pub use color::{Color, ColorMode, Palette};
+pub use color::{Color, ColorMode, Palette, Preset};
 pub use effects::outline::EdgeShade;
 pub use fill::{Dither, DitherMode, Fill};
 pub use font::{Font, figlet::FigletError};
 pub use gradient::{Gradient, GradientDirection};
 pub use grid::{Align, Padding};
+pub use style::Style;

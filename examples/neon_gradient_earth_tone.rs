@@ -1,19 +1,8 @@
-use tui_banner::{Align, Banner, ColorMode, Fill, Gradient, Palette};
+use tui_banner::{Banner, Style};
 
 fn main() -> Result<(), tui_banner::BannerError> {
     let banner = Banner::new("RUST CLI")? // text
-        .color_mode(ColorMode::TrueColor) // truecolor
-        .gradient(Gradient::vertical(Palette::from_hex(&[
-            "#E6CCB2", // sand
-            "#B08968", // earth
-            "#6B705C", // olive
-        ]))) // gradient stops
-        .fill(Fill::Keep) // keep glyphs
-        .dither()
-        .targets("░▒▓") // dither targets
-        .checker(3) // checker period
-        .align(Align::Center) // center align
-        .padding(1) // uniform padding
+        .style(Style::EarthTone) // style
         .render();
 
     println!("{banner}");

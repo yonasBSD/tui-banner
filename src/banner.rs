@@ -1,4 +1,5 @@
 use crate::color::ColorMode;
+use crate::color::Palette;
 use crate::effects::dither::apply_dot_dither;
 use crate::effects::outline::{EdgeShade, apply_edge_shade};
 use crate::effects::shadow::{Shadow, apply_shadow};
@@ -7,6 +8,7 @@ use crate::fill::{Dither, Fill, apply_fill};
 use crate::font::{self, Font, render_text};
 use crate::gradient::Gradient;
 use crate::grid::{Align, Grid, Padding};
+use crate::style::Style;
 use crate::terminal::detect_color_mode;
 
 /// High-level banner builder.
@@ -79,6 +81,14 @@ impl Banner {
     /// Set the font.
     pub fn font(mut self, font: Font) -> Self {
         self.font = font;
+        self
+    }
+
+    /// Apply a named style preset.
+    pub fn style(mut self, style: Style) -> Self {
+        self.color_mode = ColorMode::TrueColor;
+        self.gradient = Some(Gradient::vertical(Palette::preset(style.preset())));
+        self.fill = Fill::Keep;
         self
     }
 

@@ -10,6 +10,7 @@ Cinematic ANSI banners for Rust CLI/TUI.
 - Bundled DOS Rebel (Figlet) font + load any `.flf`
 - Truecolor / 256-color / no-color output with auto-detect
 - Gradients, pixel fill, dithering, shadows, edge shading
+- Named style and palette presets
 - Fluent builder API
 
 ## Quick Start
@@ -20,22 +21,11 @@ tui-banner = { path = "." }
 ```
 
 ```rust
-use tui_banner::{Align, Banner, Fill, Gradient, Palette};
+use tui_banner::{Align, Banner, Style};
 
 fn main() -> Result<(), tui_banner::BannerError> {
     let banner = Banner::new("RUST CLI")?
-        .gradient(Gradient::vertical(Palette::from_hex(&[
-            "#00E5FF",
-            "#7B5CFF",
-            "#FF5AD9",
-        ])))
-        .fill(Fill::Keep)
-        .dither()
-        .targets("░▒▓")
-        .dots("·:")
-        .checker(3)
-        .align(Align::Center)
-        .padding(1)
+        .style(Style::NeonCyber)
         .render();
 
     println!("{banner}");
