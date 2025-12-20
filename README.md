@@ -62,6 +62,12 @@ fn main() -> Result<(), tui_banner::BannerError> {
 }
 ```
 
+Run it with:
+
+```bash
+cargo run --example gradient_custom
+```
+
 ## Gradient Gallery
 
 | Vertical | Horizontal | Diagonal | Apply |
