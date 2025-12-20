@@ -15,7 +15,7 @@ Cinematic ANSI banners for Rust CLI/TUI.
 
 ```toml
 [dependencies]
-tui-banner = "0.1.3"
+tui-banner = "0.1.4"
 ```
 
 ```rust
@@ -24,6 +24,32 @@ use tui_banner::{Align, Banner, Style};
 fn main() -> Result<(), tui_banner::BannerError> {
     let banner = Banner::new("RUST CLI")?
         .style(Style::NeonCyber)
+        .render();
+
+    println!("{banner}");
+    Ok(())
+}
+```
+
+## Custom Example
+
+```rust
+use tui_banner::{Align, Banner, ColorMode, Fill, Gradient, Palette};
+
+fn main() -> Result<(), tui_banner::BannerError> {
+    let banner = Banner::new("RUST CLI")?
+        .color_mode(ColorMode::TrueColor)
+        .gradient(Gradient::vertical(Palette::from_hex(&[
+            "#00E5FF", // cyan
+            "#3A7BFF", // blue
+            "#E6F6FF", // ice
+        ])))
+        .fill(Fill::Keep)
+        .dither()
+        .targets("░▒▓")
+        .checker(3)
+        .align(Align::Center)
+        .padding(1)
         .render();
 
     println!("{banner}");

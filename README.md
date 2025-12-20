@@ -1,6 +1,7 @@
 # tui-banner
 
 Cinematic ANSI banners for Rust CLI/TUI.
+
 Website: https://tui-banner-website.pages.dev/
 
 [![Crates.io](https://img.shields.io/crates/v/tui-banner.svg)](https://crates.io/crates/tui-banner)
@@ -20,7 +21,7 @@ Website: https://tui-banner-website.pages.dev/
 
 ```toml
 [dependencies]
-tui-banner = "0.1.3"
+tui-banner = "0.1.4"
 ```
 
 ```rust
