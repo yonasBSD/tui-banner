@@ -1,4 +1,3 @@
-![Neon Cyber](assets/images/neon_gradient_neon_cyber.png)
 # tui-banner
 
 Cinematic ANSI banners for Rust CLI/TUI.
@@ -21,7 +20,7 @@ Website: https://tui-banner-website.pages.dev/
 
 ```toml
 [dependencies]
-tui-banner = { path = "." }
+tui-banner = "0.1.3"
 ```
 
 ```rust
@@ -37,21 +36,27 @@ fn main() -> Result<(), tui_banner::BannerError> {
 }
 ```
 
+## Gradient Gallery
+
+| Vertical | Horizontal | Diagonal | Apply |
+| --- | --- | --- | --- |
+| ![Gradient Vertical](assets/images/gradient_vertical.png) | ![Gradient Horizontal](assets/images/gradient_horizontal.png) | ![Gradient Diagonal](assets/images/gradient_diagonal.png) | ![Gradient Apply](assets/images/gradient_apply.png) |
+
 ## Examples
 
 ```bash
-cargo run --example neon_gradient_neon_cyber
-cargo run --example neon_gradient_arctic_tech
-cargo run --example neon_gradient_aurora_flux
-cargo run --example neon_gradient_deep_space
-cargo run --example neon_gradient_ocean_flow
-cargo run --example neon_gradient_sunset_neon
-cargo run --example neon_gradient_fire_warning
-cargo run --example neon_gradient_warm_luxury
-cargo run --example neon_gradient_forest_sky
-cargo run --example neon_gradient_earth_tone
-cargo run --example neon_gradient_chrome
-cargo run --example neon_gradient_royal_purple
-cargo run --example neon_gradient_crt_amber
-cargo run --example neon_gradient_matrix
+cargo run --example gradient_neon_cyber
+cargo run --example gradient_arctic_tech
+cargo run --example gradient_aurora_flux
+cargo run --example gradient_deep_space
+cargo run --example gradient_ocean_flow
+cargo run --example gradient_sunset_neon
+cargo run --example gradient_fire_warning
+cargo run --example gradient_warm_luxury
+cargo run --example gradient_forest_sky
+cargo run --example gradient_earth_tone
+cargo run --example gradient_chrome
+cargo run --example gradient_royal_purple
+cargo run --example gradient_crt_amber
+cargo run --example gradient_matrix
 ```

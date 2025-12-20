@@ -15,7 +15,7 @@ Cinematic ANSI banners for Rust CLI/TUI.
 
 ```toml
 [dependencies]
-tui-banner = "0.1.2"
+tui-banner = "0.1.3"
 ```
 
 ```rust
