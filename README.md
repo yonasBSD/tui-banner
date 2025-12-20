@@ -42,6 +42,12 @@ fn main() -> Result<(), tui_banner::BannerError> {
 | --- | --- | --- | --- |
 | ![Gradient Vertical](assets/images/gradient_vertical.png) | ![Gradient Horizontal](assets/images/gradient_horizontal.png) | ![Gradient Diagonal](assets/images/gradient_diagonal.png) | ![Gradient Apply](assets/images/gradient_apply.png) |
 
+## Full Gallery
+
+| Block | Half Block | Light Shade | Char |
+| --- | --- | --- | --- |
+| ![Full Block](assets/images/full_block.png) | ![Full Half Block](assets/images/full_half_block.png) | ![Full Light Shade](assets/images/full_light_shade.png) | ![Full Char](assets/images/full_char.png) |
+
 ## Examples
 
 ```bash
