@@ -71,21 +71,66 @@ cargo run --example gradient_custom
 
 ## Gradient Gallery
 
-| Vertical | Horizontal | Diagonal | Apply |
-| --- | --- | --- | --- |
-| ![Gradient Vertical](assets/images/gradient_vertical.png) | ![Gradient Horizontal](assets/images/gradient_horizontal.png) | ![Gradient Diagonal](assets/images/gradient_diagonal.png) | ![Gradient Apply](assets/images/gradient_apply.png) |
+<table>
+  <tr>
+    <th>Vertical</th>
+    <th>Horizontal</th>
+  </tr>
+  <tr>
+    <td><img alt="Gradient Vertical" src="assets/images/gradient_vertical.png" /></td>
+    <td><img alt="Gradient Horizontal" src="assets/images/gradient_horizontal.png" /></td>
+  </tr>
+  <tr>
+    <th>Diagonal</th>
+    <th>Apply</th>
+  </tr>
+  <tr>
+    <td><img alt="Gradient Diagonal" src="assets/images/gradient_diagonal.png" /></td>
+    <td><img alt="Gradient Apply" src="assets/images/gradient_apply.png" /></td>
+  </tr>
+</table>
 
 ## Full Gallery
 
-| Block | Half Block | Light Shade | Char |
-| --- | --- | --- | --- |
-| ![Full Block](assets/images/full_block.png) | ![Full Half Block](assets/images/full_half_block.png) | ![Full Light Shade](assets/images/full_light_shade.png) | ![Full Char](assets/images/full_char.png) |
+<table>
+  <tr>
+    <th>Block</th>
+    <th>Half Block</th>
+  </tr>
+  <tr>
+    <td><img alt="Full Block" src="assets/images/full_block.png" /></td>
+    <td><img alt="Full Half Block" src="assets/images/full_half_block.png" /></td>
+  </tr>
+  <tr>
+    <th>Light Shade</th>
+    <th>Char</th>
+  </tr>
+  <tr>
+    <td><img alt="Full Light Shade" src="assets/images/full_light_shade.png" /></td>
+    <td><img alt="Full Char" src="assets/images/full_char.png" /></td>
+  </tr>
+</table>
 
 ## Dither Gallery
 
-| Checker Stipple | Coarse Halftone | Film Grain | Sparkle Noise |
-| --- | --- | --- | --- |
-| ![Dither Checker Stipple](assets/images/dither_checker_stipple.png) | ![Dither Coarse Halftone](assets/images/dither_coarse_halftone.png) | ![Dither Film Grain](assets/images/dither_film_grain.png) | ![Dither Sparkle Noise](assets/images/dither_sparkle_noise.png) |
+<table>
+  <tr>
+    <th>Checker Stipple</th>
+    <th>Coarse Halftone</th>
+  </tr>
+  <tr>
+    <td><img alt="Dither Checker Stipple" src="assets/images/dither_checker_stipple.png" /></td>
+    <td><img alt="Dither Coarse Halftone" src="assets/images/dither_coarse_halftone.png" /></td>
+  </tr>
+  <tr>
+    <th>Film Grain</th>
+    <th>Sparkle Noise</th>
+  </tr>
+  <tr>
+    <td><img alt="Dither Film Grain" src="assets/images/dither_film_grain.png" /></td>
+    <td><img alt="Dither Sparkle Noise" src="assets/images/dither_sparkle_noise.png" /></td>
+  </tr>
+</table>
 
 ## Examples
 
