@@ -10,9 +10,14 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+use std::io::{self, Write};
+use std::thread;
+use std::time::Duration;
+
 use crate::color::ColorMode;
 use crate::color::Palette;
 use crate::effects::dither::apply_dot_dither;
+use crate::effects::light_sweep::{LightSweep, SweepDirection, apply_light_sweep};
 use crate::effects::outline::{EdgeShade, apply_edge_shade};
 use crate::effects::shadow::{Shadow, apply_shadow};
 use crate::emit::emit_ansi;
@@ -30,6 +35,7 @@ pub struct Banner {
     font: Font,
     gradient: Option<Gradient>,
     fill: Fill,
+    light_sweep: Option<LightSweep>,
     shadow: Option<Shadow>,
     edge_shade: Option<EdgeShade>,
     dot_dither: Option<Dither>,
@@ -76,6 +82,7 @@ impl Banner {
             font: Font::dos_rebel()?,
             gradient: None,
             fill: Fill::Blocks,
+            light_sweep: None,
             shadow: None,
             edge_shade: None,
             dot_dither: None,
@@ -119,6 +126,12 @@ impl Banner {
     /// Add a drop shadow.
     pub fn shadow(mut self, offset: (i32, i32), alpha: f32) -> Self {
         self.shadow = Some(Shadow { offset, alpha });
+        self
+    }
+
+    /// Add a highlight sweep (useful for animated passes).
+    pub fn light_sweep(mut self, sweep: LightSweep) -> Self {
+        self.light_sweep = Some(sweep);
         self
     }
 
@@ -195,10 +208,46 @@ impl Banner {
 
     /// Render to a `String` (ANSI escapes included if enabled).
     pub fn render(&self) -> String {
+        self.render_with_sweep(None)
+    }
+
+    /// Animate a light sweep over the banner.
+    ///
+    /// `speed_ms` controls the delay between frames in milliseconds.
+    pub fn animate_sweep(&self, speed_ms: u64) -> io::Result<()> {
+        let mut stdout = io::stdout();
+        write!(stdout, "\x1b[2J\x1b[?25l")?;
+        stdout.flush()?;
+
+        let frames = 180;
+        let frame_time = Duration::from_millis(speed_ms);
+        for frame in 0..frames {
+            let t = frame as f32 / frames as f32;
+            let center = -0.25 + t * 1.5;
+            let sweep = LightSweep::new(SweepDirection::DiagonalDown)
+                .center(center)
+                .width(0.25)
+                .intensity(0.9)
+                .softness(2.5);
+
+            let banner = self.render_with_sweep(Some(sweep));
+            write!(stdout, "\x1b[H{banner}")?;
+            stdout.flush()?;
+            thread::sleep(frame_time);
+        }
+
+        write!(stdout, "\x1b[?25h\n")?;
+        Ok(())
+    }
+
+    fn render_with_sweep(&self, sweep_override: Option<LightSweep>) -> String {
         let mut grid = render_text(&self.text, &self.font, self.kerning, self.line_gap);
         apply_fill(&mut grid, self.fill);
         if let Some(gradient) = &self.gradient {
             gradient.apply(&mut grid);
+        }
+        if let Some(sweep) = sweep_override.or(self.light_sweep) {
+            apply_light_sweep(&mut grid, sweep);
         }
         if let Some(dither) = self.dot_dither {
             let default_targets = ['░', '▒'];

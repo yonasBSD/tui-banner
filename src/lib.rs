@@ -53,6 +53,7 @@ pub mod terminal;
 
 pub use banner::{Banner, BannerError};
 pub use color::{Color, ColorMode, Palette, Preset};
+pub use effects::light_sweep::{LightSweep, SweepDirection};
 pub use effects::outline::EdgeShade;
 pub use fill::{Dither, DitherMode, Fill};
 pub use font::{Font, figlet::FigletError};

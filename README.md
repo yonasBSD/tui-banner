@@ -13,7 +13,7 @@ Cinematic ANSI banners for Rust CLI/TUI.
 - Grid-first rendering pipeline
 - Bundled DOS Rebel (Figlet) font + load any `.flf`
 - Truecolor / 256-color / no-color output with auto-detect
-- Gradients, pixel fill, dithering, shadows, edge shading
+- Gradients, pixel fill, dithering, shadows, edge shading, light sweeps
 - Named style and palette presets
 - Fluent builder API
 
@@ -68,6 +68,33 @@ Run it with:
 ```bash
 cargo run --example gradient_custom
 ```
+
+## Light Sweep Animation
+
+```rust
+use tui_banner::{Align, Banner, Fill, Gradient, Palette};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let banner = Banner::new("RUST CLI")?
+        .gradient(Gradient::diagonal(Palette::from_hex(&[
+            "#00E5FF", "#7B5CFF", "#FF5AD9",
+        ])))
+        .fill(Fill::Keep)
+        .align(Align::Center)
+        .padding(1);
+
+    banner.animate_sweep(5)?;
+    Ok(())
+}
+```
+
+Run it with:
+
+```bash
+cargo run --example light_sweep
+```
+
+![Light Sweep Animation](assets/images/light_sweep.gif)
 
 ## Gradient Gallery
 
@@ -153,4 +180,5 @@ cargo run --example dither_checker_stipple
 cargo run --example dither_coarse_halftone
 cargo run --example dither_film_grain
 cargo run --example dither_sparkle_noise
+cargo run --example light_sweep
 ```
