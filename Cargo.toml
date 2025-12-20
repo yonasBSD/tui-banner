@@ -12,6 +12,6 @@ authors = ["Lei Zhang <coolbeevip@gmail.com>"]
 keywords = ["tui", "banner", "ascii-art", "cli", "terminal"]
 categories = ["command-line-interface", "text-processing"]
 rust-version = "1.87"
-exclude = ["examples/*", ".github/*", ".pre-commit-config.yaml", ".gitignore", "LICENSE_HEADER.txt", "README.md", "CONTRIBUTING.md"]
+exclude = ["assets/images/*", "examples/*", ".github/*", ".pre-commit-config.yaml", ".gitignore", "LICENSE_HEADER.txt", "README.md", "CONTRIBUTING.md"]
 
 [dependencies]
