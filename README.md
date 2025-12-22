@@ -86,6 +86,29 @@ Tip: pass `Some(Color::Rgb(...))` as the second argument to tint the sweep.
 
 ![Light Sweep Animation](assets/images/light_sweep.gif)
 
+## Wave Animation
+
+```rust
+use tui_banner::{Align, Banner, Fill, Gradient, Palette};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let banner = Banner::new("RUST CLI")?
+        .gradient(Gradient::diagonal(Palette::from_hex(&[
+            "#00E5FF", "#7B5CFF", "#FF5AD9",
+        ])))
+        .fill(Fill::Keep)
+        .align(Align::Center)
+        .padding(1);
+
+    banner.animate_wave(5, None, None)?;
+    Ok(())
+}
+```
+
+Tip: pass `Some(0.45)` and `Some(0.3)` as the last two arguments to tune wave dim/bright strength.
+
+![Wave Animation](assets/images/wave.gif)
+
 ## Gradient Gallery
 
 <table>
