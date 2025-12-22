@@ -12,7 +12,7 @@ categories = ["command-line-interface", "text-processing"]
 rust-version = "1.87"
 
 [dependencies]
-tui-banner = { version = "0.2.0", path = ".." }
+tui-banner = { version = "0.2.1", path = ".." }
 
 [[bin]]
 name = "tui-banner"
