@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            archive: tar.gz
+          - os: macos-13
+            target: x86_64-apple-darwin
+            archive: tar.gz
+          - os: macos-14
+            target: aarch64-apple-darwin
+            archive: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install aarch64 linker
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
+      - name: Build
+        run: cargo build --release -p tui-banner-cli --target ${{ matrix.target }}
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+      - name: Package (unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME}"
+          target="${{ matrix.target }}"
+          staging="tui-banner-${version}-${target}"
+          mkdir -p "dist/${staging}"
+          cp "target/${target}/release/tui-banner" "dist/${staging}/tui-banner"
+          cp LICENSE README.md THIRD_PARTY_NOTICES.md "dist/${staging}/"
+          tar -czf "dist/${staging}.tar.gz" -C dist "${staging}"
+          shasum -a 256 "dist/${staging}.tar.gz" | awk '{print tolower($1)"  " $2}' > "dist/${staging}.tar.gz.sha256"
+      - name: Package (windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME
+          $target = "${{ matrix.target }}"
+          $staging = "tui-banner-$version-$target"
+          New-Item -ItemType Directory -Path "dist/$staging" -Force | Out-Null
+          Copy-Item "target/$target/release/tui-banner.exe" "dist/$staging/tui-banner.exe"
+          Copy-Item "LICENSE" "dist/$staging/"
+          Copy-Item "README.md" "dist/$staging/"
+          Copy-Item "THIRD_PARTY_NOTICES.md" "dist/$staging/"
+          $archive = "dist/$staging.zip"
+          if (Test-Path $archive) { Remove-Item $archive }
+          Compress-Archive -Path "dist/$staging/*" -DestinationPath $archive
+          $hash = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLower()
+          "$hash  $archive" | Out-File -Encoding ascii "${archive}.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            dist/**/*.tar.gz
+            dist/**/*.zip
+            dist/**/*.sha256

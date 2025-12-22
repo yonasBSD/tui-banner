@@ -157,6 +157,8 @@ Install the CLI (binary name: `tui-banner`):
 cargo install tui-banner-cli
 ```
 
+Or download a prebuilt binary from GitHub Releases (macOS/Linux/Windows) and place it on your PATH.
+
 ```bash
 tui-banner
 tui-banner --text "HELLO WORLD"
