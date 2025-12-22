@@ -249,7 +249,13 @@ impl Banner {
     /// Animate a wave-like breathing effect over the banner without moving glyphs.
     ///
     /// `speed_ms` controls the delay between frames in milliseconds.
-    pub fn animate_wave(&self, speed_ms: u64) -> io::Result<()> {
+    /// `dim_strength` and `bright_strength` tune the low/high brightness (defaults are used when `None`).
+    pub fn animate_wave(
+        &self,
+        speed_ms: u64,
+        dim_strength: Option<f32>,
+        bright_strength: Option<f32>,
+    ) -> io::Result<()> {
         let mut stdout = io::stdout();
         write!(stdout, "\x1b[2J\x1b[?25l")?;
         stdout.flush()?;
@@ -257,10 +263,8 @@ impl Banner {
         let frames = 180;
         let frame_time = Duration::from_millis(speed_ms);
         let base = self.render_grid_with_sweep(None, None);
-        let width = base.width().max(1);
-        let dim_strength = 0.35;
-        let bright_strength = 0.2;
-        let wavelength = width as f32;
+        let dim_strength = dim_strength.unwrap_or(0.35).clamp(0.0, 1.0);
+        let bright_strength = bright_strength.unwrap_or(0.2).clamp(0.0, 1.0);
         let mode = match self.color_mode {
             ColorMode::Auto => detect_color_mode(),
             other => other,
@@ -269,7 +273,7 @@ impl Banner {
         for frame in 0..frames {
             let t = frame as f32 / frames as f32;
             let phase = t * std::f32::consts::TAU;
-            let waved = apply_wave_breathe(&base, phase, wavelength, dim_strength, bright_strength);
+            let waved = apply_wave_breathe(&base, phase, dim_strength, bright_strength);
             let banner = emit_ansi(&waved, mode);
             write!(stdout, "\x1b[H{banner}")?;
             stdout.flush()?;
@@ -462,34 +466,25 @@ fn clip_width(grid: &Grid, target: usize, align: Align) -> Grid {
     out
 }
 
-fn apply_wave_breathe(
-    grid: &Grid,
-    phase: f32,
-    wavelength: f32,
-    dim_strength: f32,
-    bright_strength: f32,
-) -> Grid {
+fn apply_wave_breathe(grid: &Grid, phase: f32, dim_strength: f32, bright_strength: f32) -> Grid {
     let height = grid.height();
     let width = grid.width();
     if height == 0 || width == 0 {
         return grid.clone();
     }
 
-    let wavelength = wavelength.max(1.0);
     let mut out = grid.clone();
 
-    for col in 0..width {
-        let angle = phase + (col as f32 / wavelength) * std::f32::consts::TAU;
-        let wave = (angle.sin() + 1.0) * 0.5;
-        let (dim, bright) = if wave < 0.5 {
-            let t = (0.5 - wave) / 0.5;
-            (dim_strength * t, 0.0)
-        } else {
-            let t = (wave - 0.5) / 0.5;
-            (0.0, bright_strength * t)
-        };
-
-        for row in 0..height {
+    for row in 0..height {
+        for col in 0..width {
+            let wave = scale_wave(phase, row, col, width, height);
+            let (dim, bright) = if wave < 0.5 {
+                let t = (0.5 - wave) / 0.5;
+                (dim_strength * t, 0.0)
+            } else {
+                let t = (wave - 0.5) / 0.5;
+                (0.0, bright_strength * t)
+            };
             let Some(cell) = out.cell_mut(row, col) else {
                 continue;
             };
@@ -503,6 +498,24 @@ fn apply_wave_breathe(
     }
 
     out
+}
+
+fn scale_wave(phase: f32, row: usize, col: usize, width: usize, height: usize) -> f32 {
+    let fx = if width > 1 {
+        col as f32 / (width - 1) as f32
+    } else {
+        0.0
+    };
+    let fy = if height > 1 {
+        row as f32 / (height - 1) as f32
+    } else {
+        0.0
+    };
+
+    let freq_x = 5.0;
+    let freq_y = 3.0;
+    let phase_offset = (fx * freq_x + fy * freq_y) * std::f32::consts::TAU;
+    ((phase + phase_offset).sin() + 1.0) * 0.5
 }
 
 fn apply_breathe_color(color: Color, dim: f32, bright: f32) -> Color {

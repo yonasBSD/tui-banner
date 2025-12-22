@@ -77,7 +77,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .align(Align::Center)
         .padding(1);
 
-    banner.animate_sweep(5, None)?;
+    banner.animate_sweep(2, None)?;
     Ok(())
 }
 ```
@@ -159,16 +159,24 @@ https://github.com/coolbeevip/tui-banner/releases
 ```
 
 ```bash
+# help
 tui-banner
+
+# normal
 tui-banner --text "HELLO WORLD"
 tui-banner --text "HELLO WORLD" --style neon-cyber
 tui-banner --text "HELLO WORLD" --gradient diagonal --palette "#00E5FF,#7B5CFF,#FF5AD9"
+
+# animate sweep
 tui-banner --text "HELLO WORLD" --animate-sweep 3 --sweep-highlight "#DCEBFF"
-tui-banner --text "HELLO WORLD" --animate-wave 5
 tui-banner --text "HELLO WORLD" --animate-sweep 3 --sweep-highlight "#DCEBFF" --sweep-direction horizontal
 tui-banner --text "HELLO WORLD" --animate-sweep 3 \
     --sweep-direction diagonal-up --sweep-width 0.3 --sweep-intensity 0.9 \
     --sweep-softness 2.5 --sweep-center 0.4 --sweep-highlight "#DCEBFF"
+
+# animate wave
+tui-banner --text "HELLO WORLD" --animate-wave 3
+tui-banner --text "HELLO WORLD" --animate-wave 3 --wave-dim 0.45 --wave-bright 0.3
 ```
 
 Defaults (CLI):
@@ -181,6 +189,9 @@ Defaults (CLI):
 - Align: center
 - Color mode: truecolor
 - Sweep highlight: white
+
+Tip: `--animate-wave` keeps glyph positions fixed and adds a breathing, scale-like shimmer.
+You can tune it with `--wave-dim` (darker lows) and `--wave-bright` (brighter highs).
 
 ## Examples
 

@@ -34,3 +34,11 @@ You can run them manually:
 make lint
 # or: pre-commit run --all-files
 ```
+
+## GIF Capture (CLI Animation)
+
+```bash
+asciinema rec animate.cast -c './tui-banner --text "RUST CLI" --animate-wave 3' --overwrite
+agg animate.cast animate.gif
+gifsicle --crop 0,0+1030x250 animate.gif > output.gif
+```
