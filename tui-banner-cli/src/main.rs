@@ -52,6 +52,7 @@ struct CliOptions {
     sweep_intensity: Option<f32>,
     sweep_softness: Option<f32>,
     animate_sweep: Option<u64>,
+    animate_wave: Option<u64>,
     sweep_highlight: Option<Color>,
 }
 
@@ -166,6 +167,11 @@ fn run() -> Result<(), String> {
         banner
             .animate_sweep(speed, highlight)
             .map_err(|err| err.to_string())?;
+        return Ok(());
+    }
+
+    if let Some(speed) = opts.animate_wave {
+        banner.animate_wave(speed).map_err(|err| err.to_string())?;
         return Ok(());
     }
 
@@ -341,6 +347,10 @@ fn parse_args() -> Result<CliOptions, String> {
                     let value = take_value(flag, inline, &args, &mut index)?;
                     opts.animate_sweep = Some(parse_u64(&value, flag)?);
                 }
+                "--animate-wave" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.animate_wave = Some(parse_u64(&value, flag)?);
+                }
                 "--sweep-highlight" => {
                     let value = take_value(flag, inline, &args, &mut index)?;
                     opts.sweep_highlight = Some(parse_color(&value)?);
@@ -498,6 +508,9 @@ fn build_sweep(opts: &CliOptions) -> Result<LightSweep, String> {
 fn validate_options(opts: &CliOptions) -> Result<(), String> {
     if opts.sweep_highlight.is_some() && opts.animate_sweep.is_none() {
         return Err("`--sweep-highlight` requires `--animate-sweep`".to_string());
+    }
+    if opts.animate_sweep.is_some() && opts.animate_wave.is_some() {
+        return Err("`--animate-sweep` and `--animate-wave` cannot be used together".to_string());
     }
     if opts.pixel_dither.is_some() && !matches!(opts.fill, Some(FillKind::Pixel)) {
         return Err("pixel dither options require `--fill pixel`".to_string());
@@ -804,6 +817,7 @@ Options:
   --sweep-intensity <F>         Sweep intensity (0..1)
   --sweep-softness <F>          Sweep softness (>=1)
   --animate-sweep <MS>          Animate sweep (frame delay in ms)
+  --animate-wave <MS>           Animate wave (frame delay in ms)
   --sweep-highlight <COLOR>     Highlight color (#RRGGBB or r,g,b, default: white)
   --help, -h                    Show this help
 "#

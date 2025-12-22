@@ -246,11 +246,58 @@ impl Banner {
         Ok(())
     }
 
+    /// Animate a wave-like breathing effect over the banner without moving glyphs.
+    ///
+    /// `speed_ms` controls the delay between frames in milliseconds.
+    pub fn animate_wave(&self, speed_ms: u64) -> io::Result<()> {
+        let mut stdout = io::stdout();
+        write!(stdout, "\x1b[2J\x1b[?25l")?;
+        stdout.flush()?;
+
+        let frames = 180;
+        let frame_time = Duration::from_millis(speed_ms);
+        let base = self.render_grid_with_sweep(None, None);
+        let width = base.width().max(1);
+        let dim_strength = 0.35;
+        let bright_strength = 0.2;
+        let wavelength = width as f32;
+        let mode = match self.color_mode {
+            ColorMode::Auto => detect_color_mode(),
+            other => other,
+        };
+
+        for frame in 0..frames {
+            let t = frame as f32 / frames as f32;
+            let phase = t * std::f32::consts::TAU;
+            let waved = apply_wave_breathe(&base, phase, wavelength, dim_strength, bright_strength);
+            let banner = emit_ansi(&waved, mode);
+            write!(stdout, "\x1b[H{banner}")?;
+            stdout.flush()?;
+            thread::sleep(frame_time);
+        }
+
+        writeln!(stdout, "\x1b[?25h")?;
+        Ok(())
+    }
+
     fn render_with_sweep(
         &self,
         sweep_override: Option<LightSweep>,
         highlight: Option<Color>,
     ) -> String {
+        let grid = self.render_grid_with_sweep(sweep_override, highlight);
+        let mode = match self.color_mode {
+            ColorMode::Auto => detect_color_mode(),
+            other => other,
+        };
+        emit_ansi(&grid, mode)
+    }
+
+    fn render_grid_with_sweep(
+        &self,
+        sweep_override: Option<LightSweep>,
+        highlight: Option<Color>,
+    ) -> Grid {
         let mut grid = render_text(&self.text, &self.font, self.kerning, self.line_gap);
         apply_fill(&mut grid, self.fill);
         if let Some(gradient) = &self.gradient {
@@ -274,12 +321,7 @@ impl Banner {
         if let Some(shadow) = self.shadow {
             grid = apply_shadow(&grid, shadow);
         }
-        let grid = apply_layout(grid, self.padding, self.width, self.max_width, self.align);
-        let mode = match self.color_mode {
-            ColorMode::Auto => detect_color_mode(),
-            other => other,
-        };
-        emit_ansi(&grid, mode)
+        apply_layout(grid, self.padding, self.width, self.max_width, self.align)
     }
 }
 
@@ -418,4 +460,60 @@ fn clip_width(grid: &Grid, target: usize, align: Align) -> Grid {
         }
     }
     out
+}
+
+fn apply_wave_breathe(
+    grid: &Grid,
+    phase: f32,
+    wavelength: f32,
+    dim_strength: f32,
+    bright_strength: f32,
+) -> Grid {
+    let height = grid.height();
+    let width = grid.width();
+    if height == 0 || width == 0 {
+        return grid.clone();
+    }
+
+    let wavelength = wavelength.max(1.0);
+    let mut out = grid.clone();
+
+    for col in 0..width {
+        let angle = phase + (col as f32 / wavelength) * std::f32::consts::TAU;
+        let wave = (angle.sin() + 1.0) * 0.5;
+        let (dim, bright) = if wave < 0.5 {
+            let t = (0.5 - wave) / 0.5;
+            (dim_strength * t, 0.0)
+        } else {
+            let t = (wave - 0.5) / 0.5;
+            (0.0, bright_strength * t)
+        };
+
+        for row in 0..height {
+            let Some(cell) = out.cell_mut(row, col) else {
+                continue;
+            };
+            if !cell.visible {
+                continue;
+            }
+            if let Some(color) = cell.fg {
+                cell.fg = Some(apply_breathe_color(color, dim, bright));
+            }
+        }
+    }
+
+    out
+}
+
+fn apply_breathe_color(color: Color, dim: f32, bright: f32) -> Color {
+    let dimmed = if dim > 0.0 {
+        color.lerp(Color::Rgb(0, 0, 0), dim.clamp(0.0, 1.0))
+    } else {
+        color
+    };
+    if bright > 0.0 {
+        dimmed.lerp(Color::Rgb(255, 255, 255), bright.clamp(0.0, 1.0))
+    } else {
+        dimmed
+    }
 }

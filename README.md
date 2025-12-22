@@ -164,6 +164,7 @@ tui-banner --text "HELLO WORLD"
 tui-banner --text "HELLO WORLD" --style neon-cyber
 tui-banner --text "HELLO WORLD" --gradient diagonal --palette "#00E5FF,#7B5CFF,#FF5AD9"
 tui-banner --text "HELLO WORLD" --animate-sweep 3 --sweep-highlight "#DCEBFF"
+tui-banner --text "HELLO WORLD" --animate-wave 5
 tui-banner --text "HELLO WORLD" --animate-sweep 3 --sweep-highlight "#DCEBFF" --sweep-direction horizontal
 tui-banner --text "HELLO WORLD" --animate-sweep 3 \
     --sweep-direction diagonal-up --sweep-width 0.3 --sweep-intensity 0.9 \
