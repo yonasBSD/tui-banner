@@ -38,7 +38,7 @@ make lint
 ## GIF Capture (CLI Animation)
 
 ```bash
-asciinema rec animate.cast -c './tui-banner --text "RUST CLI" --animate-wave 3' --overwrite
+asciinema rec animate.cast -c './tui-banner --text "RUST CLI" --animate-roll 15' --overwrite
 agg animate.cast animate.gif
 gifsicle --crop 0,0+1030x250 animate.gif > output.gif
 ```

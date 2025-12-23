@@ -107,7 +107,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Tip: pass `Some(0.45)` and `Some(0.3)` as the last two arguments to tune wave dim/bright strength.
 
-![Wave Animation](assets/images/wave.gif)
+![Wave Animation](assets/images/animation_wave.gif)
+
+## Roll Animation
+
+```rust
+use tui_banner::{Align, Banner, Fill, Gradient, Palette};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let banner = Banner::new("RUST CLI")?
+        .gradient(Gradient::diagonal(Palette::from_hex(&[
+            "#00E5FF", "#7B5CFF", "#FF5AD9",
+        ])))
+        .fill(Fill::Keep)
+        .align(Align::Center)
+        .padding(1);
+
+    banner.animate_roll(4)?;
+    Ok(())
+}
+```
+
+![Roll Animation](assets/images/animation_roll.gif)
 
 ## Gradient Gallery
 
@@ -200,6 +221,9 @@ tui-banner --text "HELLO WORLD" --animate-sweep 3 \
 # animate wave
 tui-banner --text "HELLO WORLD" --animate-wave 3
 tui-banner --text "HELLO WORLD" --animate-wave 3 --wave-dim 0.45 --wave-bright 0.3
+
+# animate roll
+tui-banner --text "HELLO WORLD" --animate-roll 15
 ```
 
 Defaults (CLI):

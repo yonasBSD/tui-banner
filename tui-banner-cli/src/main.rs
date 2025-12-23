@@ -53,6 +53,7 @@ struct CliOptions {
     sweep_softness: Option<f32>,
     animate_sweep: Option<u64>,
     animate_wave: Option<u64>,
+    animate_roll: Option<u64>,
     wave_dim: Option<f32>,
     wave_bright: Option<f32>,
     sweep_highlight: Option<Color>,
@@ -176,6 +177,11 @@ fn run() -> Result<(), String> {
         banner
             .animate_wave(speed, opts.wave_dim, opts.wave_bright)
             .map_err(|err| err.to_string())?;
+        return Ok(());
+    }
+
+    if let Some(speed) = opts.animate_roll {
+        banner.animate_roll(speed).map_err(|err| err.to_string())?;
         return Ok(());
     }
 
@@ -355,6 +361,10 @@ fn parse_args() -> Result<CliOptions, String> {
                     let value = take_value(flag, inline, &args, &mut index)?;
                     opts.animate_wave = Some(parse_u64(&value, flag)?);
                 }
+                "--animate-roll" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.animate_roll = Some(parse_u64(&value, flag)?);
+                }
                 "--wave-dim" => {
                     let value = take_value(flag, inline, &args, &mut index)?;
                     opts.wave_dim = Some(parse_f32(&value, flag)?);
@@ -521,8 +531,16 @@ fn validate_options(opts: &CliOptions) -> Result<(), String> {
     if opts.sweep_highlight.is_some() && opts.animate_sweep.is_none() {
         return Err("`--sweep-highlight` requires `--animate-sweep`".to_string());
     }
-    if opts.animate_sweep.is_some() && opts.animate_wave.is_some() {
-        return Err("`--animate-sweep` and `--animate-wave` cannot be used together".to_string());
+    let animations = [
+        opts.animate_sweep.is_some(),
+        opts.animate_wave.is_some(),
+        opts.animate_roll.is_some(),
+    ];
+    if animations.into_iter().filter(|enabled| *enabled).count() > 1 {
+        return Err(
+            "`--animate-sweep`, `--animate-wave`, and `--animate-roll` cannot be used together"
+                .to_string(),
+        );
     }
     if (opts.wave_dim.is_some() || opts.wave_bright.is_some()) && opts.animate_wave.is_none() {
         return Err("`--wave-dim` and `--wave-bright` require `--animate-wave`".to_string());
@@ -833,6 +851,7 @@ Options:
   --sweep-softness <F>          Sweep softness (>=1)
   --animate-sweep <MS>          Animate sweep (frame delay in ms)
   --animate-wave <MS>           Animate wave (frame delay in ms)
+  --animate-roll <MS>           Animate roll (frame delay in ms)
   --wave-dim <F>                Wave dim strength (0..1, default: 0.35)
   --wave-bright <F>             Wave bright strength (0..1, default: 0.2)
   --sweep-highlight <COLOR>     Highlight color (#RRGGBB or r,g,b, default: white)

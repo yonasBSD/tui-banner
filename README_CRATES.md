@@ -104,3 +104,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 Tip: pass `Some(0.45)` and `Some(0.3)` as the last two arguments to tune wave dim/bright strength.
+
+## Roll Animation
+
+```rust
+use tui_banner::{Align, Banner, Fill, Gradient, Palette};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let banner = Banner::new("RUST CLI")?
+        .gradient(Gradient::diagonal(Palette::from_hex(&[
+            "#00E5FF", "#7B5CFF", "#FF5AD9",
+        ])))
+        .fill(Fill::Keep)
+        .align(Align::Center)
+        .padding(1);
+
+    banner.animate_roll(4)?;
+    Ok(())
+}
+```
+
+Tip: the roll pushes a bright crest forward with a trailing shadow for a unified, forceful sweep.

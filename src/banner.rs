@@ -284,6 +284,35 @@ impl Banner {
         Ok(())
     }
 
+    /// Animate a rolling wave (tsunami roll) that advances with a heavy crest.
+    ///
+    /// `speed_ms` controls the delay between frames in milliseconds.
+    pub fn animate_roll(&self, speed_ms: u64) -> io::Result<()> {
+        let mut stdout = io::stdout();
+        write!(stdout, "\x1b[2J\x1b[?25l")?;
+        stdout.flush()?;
+
+        let frames = 180;
+        let frame_time = Duration::from_millis(speed_ms);
+        let base = self.render_grid_with_sweep(None, None);
+        let mode = match self.color_mode {
+            ColorMode::Auto => detect_color_mode(),
+            other => other,
+        };
+
+        for frame in 0..frames {
+            let t = frame as f32 / frames as f32;
+            let rolled = apply_roll(&base, t);
+            let banner = emit_ansi(&rolled, mode);
+            write!(stdout, "\x1b[H{banner}")?;
+            stdout.flush()?;
+            thread::sleep(frame_time);
+        }
+
+        writeln!(stdout, "\x1b[?25h")?;
+        Ok(())
+    }
+
     fn render_with_sweep(
         &self,
         sweep_override: Option<LightSweep>,
@@ -493,6 +522,84 @@ fn apply_wave_breathe(grid: &Grid, phase: f32, dim_strength: f32, bright_strengt
             }
             if let Some(color) = cell.fg {
                 cell.fg = Some(apply_breathe_color(color, dim, bright));
+            }
+        }
+    }
+
+    out
+}
+
+fn apply_roll(grid: &Grid, t: f32) -> Grid {
+    let height = grid.height();
+    let width = grid.width();
+    if height == 0 || width == 0 {
+        return grid.clone();
+    }
+
+    let center = -0.2 + t * 1.4;
+    let front_width = 0.06;
+    let back_width = 0.22;
+    let bright_strength = 0.6;
+    let dim_strength = 0.5;
+    let mid = (height as f32 - 1.0) / 2.0;
+
+    let mut out = Grid::new(height, width);
+    for row in 0..height {
+        let row_falloff = if height > 1 {
+            let rel = ((row as f32 - mid).abs() / mid).min(1.0);
+            1.0 - 0.25 * rel
+        } else {
+            1.0
+        };
+        for col in 0..width {
+            let Some(source) = grid.cell(row, col) else {
+                continue;
+            };
+            if !source.visible {
+                continue;
+            }
+
+            let x = if width > 1 {
+                col as f32 / (width - 1) as f32
+            } else {
+                0.0
+            };
+            let d = x - center;
+            let mut base_color = source.fg.unwrap_or(Color::Rgb(255, 255, 255));
+            if d > 0.0 {
+                base_color = Color::Rgb(255, 255, 255);
+            }
+            let mut bright = 0.0;
+            let mut dim = 0.0;
+
+            if d >= 0.0 && d <= front_width {
+                let t = 1.0 - d / front_width;
+                bright = t.powf(1.7);
+            } else if d < 0.0 && d >= -back_width {
+                let t = 1.0 - (-d) / back_width;
+                dim = t.powf(1.2);
+            }
+
+            let crest = if d >= 0.0 && d <= front_width {
+                let t = 1.0 - d / front_width;
+                t.powf(1.4)
+            } else {
+                0.0
+            };
+            let offset = -(crest * 1.0).round() as i32;
+
+            let bright_amt = (bright * bright_strength * row_falloff).clamp(0.0, 1.0);
+            let dim_amt = (dim * dim_strength * row_falloff).clamp(0.0, 1.0);
+
+            let dest = row as i32 + offset;
+            if dest < 0 || dest >= height as i32 {
+                continue;
+            }
+
+            let mut cell = source.clone();
+            cell.fg = Some(apply_breathe_color(base_color, dim_amt, bright_amt));
+            if let Some(target) = out.cell_mut(dest as usize, col) {
+                *target = cell;
             }
         }
     }
