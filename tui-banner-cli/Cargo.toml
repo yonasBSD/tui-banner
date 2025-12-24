@@ -1,6 +1,6 @@
 [package]
 name = "tui-banner-cli"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 description = "CLI for tui-banner"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ categories = ["command-line-interface", "text-processing"]
 rust-version = "1.87"
 
 [dependencies]
-tui-banner = { version = "0.2.2", path = ".." }
+tui-banner = { version = "0.2.3", path = ".." }
 
 [[bin]]
 name = "tui-banner"

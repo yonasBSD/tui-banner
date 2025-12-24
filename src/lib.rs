@@ -42,6 +42,8 @@ pub mod emit;
 pub mod fill;
 /// Fonts and glyph rendering.
 pub mod font;
+/// Frame (border) rendering.
+pub mod frame;
 /// Gradient definitions.
 pub mod gradient;
 /// Grid and layout types.
@@ -57,6 +59,7 @@ pub use effects::light_sweep::{LightSweep, SweepDirection};
 pub use effects::outline::EdgeShade;
 pub use fill::{Dither, DitherMode, Fill};
 pub use font::{Font, figlet::FigletError};
+pub use frame::{Frame, FrameChars, FramePaint, FrameStyle};
 pub use gradient::{Gradient, GradientDirection};
 pub use grid::{Align, Padding};
 pub use style::Style;

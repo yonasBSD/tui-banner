@@ -137,6 +137,36 @@ impl Grid {
             }
         }
     }
+
+    /// Trim fully blank rows from the top and bottom.
+    pub fn trim_vertical(&self) -> Self {
+        if self.height() == 0 {
+            return self.clone();
+        }
+
+        let mut top = 0;
+        let mut bottom = self.height();
+
+        while top < bottom && !row_has_visible(&self.cells[top]) {
+            top += 1;
+        }
+
+        while bottom > top && !row_has_visible(&self.cells[bottom - 1]) {
+            bottom -= 1;
+        }
+
+        if top == 0 && bottom == self.height() {
+            return self.clone();
+        }
+
+        Grid {
+            cells: self.cells[top..bottom].to_vec(),
+        }
+    }
+}
+
+fn row_has_visible(row: &[Cell]) -> bool {
+    row.iter().any(|cell| cell.visible)
 }
 
 impl Padding {

@@ -13,7 +13,7 @@ Cinematic ANSI banners for Rust CLI/TUI.
 - Grid-first rendering pipeline
 - Bundled DOS Rebel (Figlet) font + load any `.flf`
 - Truecolor / 256-color / no-color output with auto-detect
-- Gradients, pixel fill, dithering, shadows, edge shading, light sweeps
+- Gradients, pixel fill, dithering, shadows, edge shading, light sweeps, frames/borders
 - Named style and palette presets
 - Fluent builder API
 
@@ -56,6 +56,28 @@ fn main() -> Result<(), tui_banner::BannerError> {
         .checker(3)
         .align(Align::Center)
         .padding(1)
+        .render();
+
+    println!("{banner}");
+    Ok(())
+}
+```
+
+## Frames & Borders
+
+```rust
+use tui_banner::{Align, Banner, Frame, FrameStyle, Gradient, Palette, Style};
+
+fn main() -> Result<(), tui_banner::BannerError> {
+    let frame = Frame::new(FrameStyle::Rounded).gradient(Gradient::horizontal(
+        Palette::from_hex(&["#00E5FF", "#7B5CFF", "#FF5AD9"]),
+    ));
+
+    let banner = Banner::new("RUST CLI")?
+        .style(Style::NeonCyber)
+        .align(Align::Center)
+        .padding(1)
+        .frame(frame)
         .render();
 
     println!("{banner}");
@@ -208,8 +230,18 @@ tui-banner
 
 # normal
 tui-banner --text "HELLO WORLD"
+
+# style
 tui-banner --text "HELLO WORLD" --style neon-cyber
+
+# gradient
 tui-banner --text "HELLO WORLD" --gradient diagonal --palette "#00E5FF,#7B5CFF,#FF5AD9"
+
+# frame
+tui-banner --text "HELLO WORLD" --frame rounded
+tui-banner --text "HELLO WORLD" --frame rounded --frame-gradient horizontal \
+    --frame-palette "#00E5FF,#7B5CFF,#FF5AD9"
+tui-banner --text "HELLO WORLD" --frame double --frame-color "#F59E0B" --padding 2
 
 # animate sweep
 tui-banner --text "HELLO WORLD" --animate-sweep 3 --sweep-highlight "#DCEBFF"
@@ -234,32 +266,10 @@ Defaults (CLI):
 - Dither targets: ░▒▓ (when dither enabled)
 - Padding: 1
 - Align: center
+- Trim vertical: enabled (use `--no-trim-vertical` to keep blank rows)
 - Color mode: truecolor
 - Sweep highlight: white
+- Frame: none
 
 Tip: `--animate-wave` keeps glyph positions fixed and adds a breathing, scale-like shimmer.
 You can tune it with `--wave-dim` (darker lows) and `--wave-bright` (brighter highs).
-
-## Examples
-
-```bash
-cargo run --example gradient_neon_cyber
-cargo run --example gradient_arctic_tech
-cargo run --example gradient_aurora_flux
-cargo run --example gradient_deep_space
-cargo run --example gradient_ocean_flow
-cargo run --example gradient_sunset_neon
-cargo run --example gradient_fire_warning
-cargo run --example gradient_warm_luxury
-cargo run --example gradient_forest_sky
-cargo run --example gradient_earth_tone
-cargo run --example gradient_chrome
-cargo run --example gradient_royal_purple
-cargo run --example gradient_crt_amber
-cargo run --example gradient_matrix
-cargo run --example dither_checker_stipple
-cargo run --example dither_coarse_halftone
-cargo run --example dither_film_grain
-cargo run --example dither_sparkle_noise
-cargo run --example light_sweep
-```

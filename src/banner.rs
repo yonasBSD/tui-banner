@@ -23,6 +23,7 @@ use crate::effects::shadow::{Shadow, apply_shadow};
 use crate::emit::emit_ansi;
 use crate::fill::{Dither, Fill, apply_fill};
 use crate::font::{self, Font, render_text};
+use crate::frame::{Frame, apply_frame};
 use crate::gradient::Gradient;
 use crate::grid::{Align, Grid, Padding};
 use crate::style::Style;
@@ -42,10 +43,12 @@ pub struct Banner {
     dot_dither_targets: Option<Vec<char>>,
     align: Align,
     padding: Padding,
+    frame: Option<Frame>,
     width: Option<usize>,
     max_width: Option<usize>,
     kerning: usize,
     line_gap: usize,
+    trim_vertical: bool,
     color_mode: ColorMode,
 }
 
@@ -89,10 +92,12 @@ impl Banner {
             dot_dither_targets: None,
             align: Align::Left,
             padding: Padding::uniform(0),
+            frame: None,
             width: None,
             max_width: None,
             kerning: 1,
             line_gap: 0,
+            trim_vertical: false,
             color_mode: ColorMode::Auto,
         })
     }
@@ -176,6 +181,12 @@ impl Banner {
         self
     }
 
+    /// Add a frame around the banner.
+    pub fn frame(mut self, frame: Frame) -> Self {
+        self.frame = Some(frame);
+        self
+    }
+
     /// Force an output width (pads or clips).
     pub fn width(mut self, width: usize) -> Self {
         self.width = Some(width);
@@ -197,6 +208,12 @@ impl Banner {
     /// Blank lines between text lines.
     pub fn line_gap(mut self, line_gap: usize) -> Self {
         self.line_gap = line_gap;
+        self
+    }
+
+    /// Trim blank rows from the top and bottom of the rendered grid.
+    pub fn trim_vertical(mut self, enabled: bool) -> Self {
+        self.trim_vertical = enabled;
         self
     }
 
@@ -354,7 +371,15 @@ impl Banner {
         if let Some(shadow) = self.shadow {
             grid = apply_shadow(&grid, shadow);
         }
-        apply_layout(grid, self.padding, self.width, self.max_width, self.align)
+        if self.trim_vertical {
+            grid = grid.trim_vertical();
+        }
+        let grid = apply_layout(grid, self.padding, self.width, self.max_width, self.align);
+        if let Some(frame) = &self.frame {
+            apply_frame(grid, frame)
+        } else {
+            grid
+        }
     }
 }
 

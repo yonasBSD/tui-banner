@@ -15,8 +15,8 @@ use std::fs;
 use std::path::PathBuf;
 
 use tui_banner::{
-    Align, Banner, Color, ColorMode, Dither, Fill, Font, Gradient, GradientDirection, LightSweep,
-    Palette, Preset, Style, SweepDirection,
+    Align, Banner, Color, ColorMode, Dither, Fill, Font, Frame, FrameChars, FrameStyle, Gradient,
+    GradientDirection, LightSweep, Palette, Preset, Style, SweepDirection,
 };
 
 const DEFAULT_PALETTE: [&str; 3] = ["#00E5FF", "#3A7BFF", "#E6F6FF"];
@@ -29,6 +29,12 @@ struct CliOptions {
     preset: Option<Preset>,
     gradient: Option<GradientDirection>,
     palette: Option<Vec<String>>,
+    frame_style: Option<FrameStyle>,
+    frame_chars: Option<String>,
+    frame_color: Option<Color>,
+    frame_gradient: Option<GradientDirection>,
+    frame_palette: Option<Vec<String>>,
+    frame_preset: Option<Preset>,
     fill: Option<FillKind>,
     fill_char: Option<char>,
     pixel_dither: Option<DitherSpec>,
@@ -44,6 +50,7 @@ struct CliOptions {
     max_width: Option<usize>,
     kerning: Option<usize>,
     line_gap: Option<usize>,
+    trim_vertical: Option<bool>,
     color_mode: Option<ColorMode>,
     light_sweep: bool,
     sweep_direction: Option<SweepDirection>,
@@ -137,6 +144,10 @@ fn run() -> Result<(), String> {
         .unwrap_or_else(|| tui_banner::Padding::uniform(1));
     banner = banner.padding(padding);
 
+    if let Some(frame) = build_frame(&opts)? {
+        banner = banner.frame(frame);
+    }
+
     if let Some(width) = opts.width {
         banner = banner.width(width);
     }
@@ -151,6 +162,10 @@ fn run() -> Result<(), String> {
 
     if let Some(line_gap) = opts.line_gap {
         banner = banner.line_gap(line_gap);
+    }
+
+    if opts.trim_vertical.unwrap_or(true) {
+        banner = banner.trim_vertical(true);
     }
 
     let gradient = resolve_gradient(&opts)?;
@@ -240,6 +255,36 @@ fn parse_args() -> Result<CliOptions, String> {
                     }
                     opts.palette.get_or_insert_with(Vec::new).extend(entries);
                 }
+                "--frame" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.frame_style = Some(parse_frame_style(&value)?);
+                }
+                "--frame-chars" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.frame_chars = Some(value);
+                }
+                "--frame-color" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.frame_color = Some(parse_color(&value)?);
+                }
+                "--frame-gradient" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.frame_gradient = Some(parse_gradient_dir(&value)?);
+                }
+                "--frame-palette" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    let entries = parse_list(&value);
+                    if entries.is_empty() {
+                        return Err("`--frame-palette` expects at least one color".to_string());
+                    }
+                    opts.frame_palette
+                        .get_or_insert_with(Vec::new)
+                        .extend(entries);
+                }
+                "--frame-preset" => {
+                    let value = take_value(flag, inline, &args, &mut index)?;
+                    opts.frame_preset = Some(parse_preset(&value)?);
+                }
                 "--fill" => {
                     let value = take_value(flag, inline, &args, &mut index)?;
                     opts.fill = Some(parse_fill(&value)?);
@@ -325,6 +370,12 @@ fn parse_args() -> Result<CliOptions, String> {
                 "--line-gap" => {
                     let value = take_value(flag, inline, &args, &mut index)?;
                     opts.line_gap = Some(parse_usize(&value, flag)?);
+                }
+                "--trim-vertical" => {
+                    opts.trim_vertical = Some(true);
+                }
+                "--no-trim-vertical" => {
+                    opts.trim_vertical = Some(false);
                 }
                 "--color-mode" => {
                     let value = take_value(flag, inline, &args, &mut index)?;
@@ -551,6 +602,15 @@ fn validate_options(opts: &CliOptions) -> Result<(), String> {
     if opts.pixel_dither.is_none() && opts.pixel_dither_dots.is_some() {
         return Err("`--pixel-dither-dots` requires a pixel dither mode".to_string());
     }
+    if opts.frame_style.is_some() && opts.frame_chars.is_some() {
+        return Err("`--frame` and `--frame-chars` cannot be used together".to_string());
+    }
+    let frame_gradient = opts.frame_gradient.is_some()
+        || opts.frame_palette.is_some()
+        || opts.frame_preset.is_some();
+    if opts.frame_color.is_some() && frame_gradient {
+        return Err("frame color and frame gradient cannot be used together".to_string());
+    }
     Ok(())
 }
 
@@ -611,6 +671,17 @@ fn parse_style(value: &str) -> Result<Style, String> {
         "matrix" => Ok(Style::Matrix),
         "aurora-flux" => Ok(Style::AuroraFlux),
         other => Err(format!("unknown style: {other}")),
+    }
+}
+
+fn parse_frame_style(value: &str) -> Result<FrameStyle, String> {
+    match normalize(value).as_str() {
+        "single" => Ok(FrameStyle::Single),
+        "double" => Ok(FrameStyle::Double),
+        "rounded" | "round" => Ok(FrameStyle::Rounded),
+        "heavy" => Ok(FrameStyle::Heavy),
+        "ascii" => Ok(FrameStyle::Ascii),
+        other => Err(format!("unknown frame style: {other}")),
     }
 }
 
@@ -780,6 +851,85 @@ fn parse_color(value: &str) -> Result<Color, String> {
     Ok(Color::Rgb(r, g, b))
 }
 
+fn parse_frame_chars(value: &str) -> Result<FrameChars, String> {
+    let parts = parse_list(value);
+    if parts.len() == 6 {
+        let tl = parse_char(&parts[0])?;
+        let tr = parse_char(&parts[1])?;
+        let bl = parse_char(&parts[2])?;
+        let br = parse_char(&parts[3])?;
+        let h = parse_char(&parts[4])?;
+        let v = parse_char(&parts[5])?;
+        return Ok(FrameChars::new(tl, tr, bl, br, h, v));
+    }
+
+    let mut chars = value.chars();
+    let tl = chars.next().ok_or("frame chars expects 6 characters")?;
+    let tr = chars.next().ok_or("frame chars expects 6 characters")?;
+    let bl = chars.next().ok_or("frame chars expects 6 characters")?;
+    let br = chars.next().ok_or("frame chars expects 6 characters")?;
+    let h = chars.next().ok_or("frame chars expects 6 characters")?;
+    let v = chars.next().ok_or("frame chars expects 6 characters")?;
+    if chars.next().is_some() {
+        return Err("frame chars expects exactly 6 characters".to_string());
+    }
+    Ok(FrameChars::new(tl, tr, bl, br, h, v))
+}
+
+fn build_frame(opts: &CliOptions) -> Result<Option<Frame>, String> {
+    let has_frame = opts.frame_style.is_some()
+        || opts.frame_chars.is_some()
+        || opts.frame_color.is_some()
+        || opts.frame_gradient.is_some()
+        || opts.frame_palette.is_some()
+        || opts.frame_preset.is_some();
+    if !has_frame {
+        return Ok(None);
+    }
+
+    let chars = if let Some(chars) = &opts.frame_chars {
+        parse_frame_chars(chars)?
+    } else if let Some(style) = opts.frame_style {
+        style.chars()
+    } else {
+        FrameStyle::Single.chars()
+    };
+
+    let mut frame = Frame::custom(chars);
+
+    if let Some(color) = opts.frame_color {
+        frame = frame.color(color);
+    }
+
+    let gradient_requested = opts.frame_gradient.is_some()
+        || opts.frame_palette.is_some()
+        || opts.frame_preset.is_some();
+    if gradient_requested {
+        let direction = opts.frame_gradient.unwrap_or(GradientDirection::Diagonal);
+        let palette = if let Some(palette) = &opts.frame_palette {
+            let list: Vec<&str> = palette.iter().map(String::as_str).collect();
+            let palette = Palette::from_hex(&list);
+            if palette.colors().is_empty() {
+                return Err("`--frame-palette` did not contain any valid colors".to_string());
+            }
+            palette
+        } else if let Some(preset) = opts.frame_preset {
+            Palette::preset(preset)
+        } else {
+            Palette::from_hex(&DEFAULT_PALETTE)
+        };
+
+        let gradient = match direction {
+            GradientDirection::Vertical => Gradient::vertical(palette),
+            GradientDirection::Horizontal => Gradient::horizontal(palette),
+            GradientDirection::Diagonal => Gradient::diagonal(palette),
+        };
+        frame = frame.gradient(gradient);
+    }
+
+    Ok(Some(frame))
+}
+
 fn parse_usize(value: &str, flag: &str) -> Result<usize, String> {
     value
         .parse::<usize>()
@@ -825,6 +975,12 @@ Options:
   --gradient <DIR>              vertical | horizontal | diagonal (default: diagonal)
   --palette <HEXES>             Comma-separated hex colors (default: #00E5FF,#3A7BFF,#E6F6FF)
   --preset <PRESET>             Palette preset (same names as styles)
+  --frame <STYLE>               single | double | rounded | heavy | ascii
+  --frame-chars <CHARS>         6 chars (tltrblbrhv) or 6 comma-separated chars
+  --frame-color <COLOR>         Frame color (#RRGGBB or r,g,b)
+  --frame-gradient <DIR>        vertical | horizontal | diagonal (default: diagonal)
+  --frame-palette <HEXES>       Frame palette colors (default: #00E5FF,#3A7BFF,#E6F6FF)
+  --frame-preset <PRESET>       Frame palette preset (same names as styles)
   --fill <FILL>                 keep | blocks | solid | pixel (default: keep)
   --fill-char <CHAR>            Character for solid/pixel fills
   --pixel-dither-checker <N>    Pixel dither checker period
@@ -842,6 +998,8 @@ Options:
   --max-width <N>               Clamp output width
   --kerning <N>                 Space between characters
   --line-gap <N>                Blank lines between text lines
+  --trim-vertical               Trim blank rows from top/bottom (default)
+  --no-trim-vertical            Keep top/bottom blank rows
   --color-mode <MODE>           auto | truecolor | ansi256 | no-color (default: truecolor)
   --light-sweep                 Enable static sweep
   --sweep-direction <DIR>       horizontal | vertical | diagonal-down | diagonal-up

@@ -7,11 +7,12 @@ Cinematic ANSI banners for Rust CLI/TUI.
 - Grid-first rendering pipeline
 - Bundled DOS Rebel (Figlet) font + load any `.flf`
 - Truecolor / 256-color / no-color output with auto-detect
-- Gradients, pixel fill, dithering, shadows, edge shading, light sweeps
+- Gradients, pixel fill, dithering, shadows, edge shading, light sweeps, frames/borders
 - Named style and palette presets
 - Fluent builder API
 
 CLI note: download the `tui-banner` binary from GitHub Releases and place it on your PATH.
+CLI default: trims blank rows at the top/bottom; use `--no-trim-vertical` to keep them.
 
 ```text
 https://github.com/coolbeevip/tui-banner/releases
@@ -56,6 +57,28 @@ fn main() -> Result<(), tui_banner::BannerError> {
         .checker(3)
         .align(Align::Center)
         .padding(1)
+        .render();
+
+    println!("{banner}");
+    Ok(())
+}
+```
+
+## Frames & Borders
+
+```rust
+use tui_banner::{Align, Banner, Frame, FrameStyle, Gradient, Palette, Style};
+
+fn main() -> Result<(), tui_banner::BannerError> {
+    let frame = Frame::new(FrameStyle::Rounded).gradient(Gradient::horizontal(
+        Palette::from_hex(&["#00E5FF", "#7B5CFF", "#FF5AD9"]),
+    ));
+
+    let banner = Banner::new("RUST CLI")?
+        .style(Style::NeonCyber)
+        .align(Align::Center)
+        .padding(1)
+        .frame(frame)
         .render();
 
     println!("{banner}");
